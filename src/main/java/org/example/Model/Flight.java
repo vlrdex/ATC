@@ -17,7 +17,7 @@ public class Flight {
     //in feet
     private int currAltitude;
     private int assignedAltitude;
-    private ACModell type;
+    private final ACModel type;
     private Point2D position;
 
     //TODO maradék adatokkal kiegésziteni
@@ -30,7 +30,7 @@ public class Flight {
     private static final Random random = new Random(12);
 
 
-    public Flight(int currDeg, int assignedDeg, int currSpeed, int assignedSpeed, int currAltitude, int assignedAltitude, ACModell type, Point2D position) {
+    public Flight(int currDeg, int assignedDeg, int currSpeed, int assignedSpeed, int currAltitude, int assignedAltitude, ACModel type, Point2D position) {
         this.id=generateId();
         this.currDeg = currDeg;
         this.assignedDeg = assignedDeg;
@@ -42,7 +42,7 @@ public class Flight {
         this.position = position;
     }
 
-    public Flight(int currDeg, int currSpeed, int currAltitude, ACModell type, Point2D position) {
+    public Flight(int currDeg, int currSpeed, int currAltitude, ACModel type, Point2D position) {
         this.id=generateId();
         this.currDeg = currDeg;
         this.assignedDeg=currDeg;
@@ -169,7 +169,7 @@ public class Flight {
         }
     }
 
-    public ACModell getType() {
+    public ACModel getType() {
         return type;
     }
 

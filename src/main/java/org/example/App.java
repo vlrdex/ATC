@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.example.Controller.ACModelController;
 import org.example.Controller.GameController;
 import org.example.Model.Flight;
 import org.example.View.GameView;
@@ -21,11 +22,15 @@ public class App extends Application {
     public void start(Stage stage) {
         GameView gameView= new GameView(stage);
         GameController gameController= GameController.getInstance(gameView);
+        ACModelController acModelController=ACModelController.getInstance();
 
 
-        gameController.flights.add(new Flight(0,180,15000,null,new Point2D(500,600)));
-        gameController.flights.add(new Flight(279,320,15000,null,new Point2D(1200,300)));
-        gameController.flights.add(new Flight(90,180,15000,null,new Point2D(100,200)));
+        gameController.flights.add(new Flight(0,180,15000,
+                acModelController.getRandom(),new Point2D(500,600)));
+        gameController.flights.add(new Flight(279,320,15000,
+                acModelController.getRandom(),new Point2D(1200,300)));
+        gameController.flights.add(new Flight(90,180,15000,
+                acModelController.getRandom(),new Point2D(100,200)));
 
         gameView.updateAircraftList();
 

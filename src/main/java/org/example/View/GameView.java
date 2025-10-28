@@ -285,7 +285,10 @@ public class GameView{
         Label degLabel = new Label("Deg: " + flight.getCurrDeg());
         degLabel.setStyle("-fx-text-fill: lightgray;");
 
-        card.getChildren().addAll(nameLabel, speedLabel, altLabel, degLabel);
+        Label modelLabel = new Label("Model: " + flight.getType().name);
+        degLabel.setStyle("-fx-text-fill: lightgray;");
+
+        card.getChildren().addAll(nameLabel, speedLabel, altLabel, degLabel,modelLabel);
         return card;
     }
 
