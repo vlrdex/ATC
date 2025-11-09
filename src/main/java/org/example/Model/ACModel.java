@@ -14,4 +14,9 @@ public class ACModel {
         this.climbRate = climbRate;
         this.accRate = accRate;
     }
+
+    @Override
+    public String toString(){
+        return "Name: "+name+"\nTop speed: "+topSpeed+"\nMax altitude: "+maxAltitude+"\nClimb rate: "+climbRate;
+    }
 }

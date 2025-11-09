@@ -10,14 +10,17 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.example.Controller.GameController;
+import org.example.Model.AirPort;
 import org.example.Model.Flight;
+import org.example.Model.Point;
+import org.example.Model.Runway;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameView{
@@ -26,6 +29,7 @@ public class GameView{
     private Canvas canvas;
     private GraphicsContext gc;
     private Stage stage;
+    private Stage modelStage;
 
 
     //for terminal
@@ -37,9 +41,11 @@ public class GameView{
     private Flight selected=null;
     private VBox controlPanel;
     private VBox aircraftListContainer;
+    private VBox inputBox;
     private final Map<Flight, VBox> flightCards = new HashMap<>();
     private TextField altitudeField, speedField, degField, headingField;
     private Button applyButton;
+    private Button modelButton;
 
 
 
@@ -99,7 +105,7 @@ public class GameView{
 
         commandInput = new TextField();
         commandInput.setPromptText("Enter command...");
-        commandInput.setOnAction(e -> handleCommand(commandInput.getText()));
+        commandInput.setOnAction(e -> handelApply(commandInput.getText()));
         commandInput.setStyle(
                 "-fx-control-inner-background: black;" +
                         "-fx-background-color: black;" +
@@ -147,7 +153,19 @@ public class GameView{
         applyButton.setMaxWidth(Double.MAX_VALUE);
         applyButton.setOnAction(event -> handelButton());
 
-        VBox inputBox = new VBox(8, altitudeField, speedField, degField, headingField, applyButton);
+
+        modelStage=new Stage();
+        modelButton = new Button("Model data");
+        modelButton.setStyle(
+                "-fx-background-color: #3c6e71; -fx-text-fill: white; -fx-font-weight: bold;"
+        );
+        modelButton.setMaxWidth(Double.MAX_VALUE);
+        modelButton.setOnAction(event -> {
+            new ModelView(modelStage,selected.getType());
+        });
+
+
+        inputBox = new VBox(8, altitudeField, speedField, degField, headingField, applyButton);
         inputBox.setPadding(new Insets(10, 0, 0, 0));
 
         controlPanel.getChildren().addAll(controlTitle, aircraftScroll, inputBox);
@@ -165,6 +183,7 @@ public class GameView{
                 case ESCAPE:
                     gameController.changeFlightAsPlayerInput("stop");
                     stage.close();
+                    modelStage.close();
                     break;
             }
         });
@@ -190,9 +209,28 @@ public class GameView{
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, 1280, 720);
 
+        AirPort airPort=gameController.airPort;
+        gc.setStroke(Color.WHITE);
+        for (Runway runway: airPort.getRunways()){
+            List<Point> point=runway.getEndPoints();
+            gc.strokeLine(point.get(0).getX(),point.get(0).getY()
+                ,point.get(1).getX(),point.get(1).getY()
+            );
+
+            gc.strokeText(point.get(0).getName(),point.get(0).getX()-20,point.get(0).getY()-20);
+            gc.strokeText(point.get(1).getName(),point.get(1).getX()-20,point.get(1).getY()-20);
+        }
+
+        gc.setFill(Color.WHITE);
+        for (Point point:airPort.getNearbyPoints()){
+            gc.fillRect(point.getX(), point.getY(), 2,5);
+            gc.fillText(point.getName(), point.getX()-15, point.getY()-10 );
+        }
+
+
+
         gc.setStroke(Color.WHITE);
         gc.setFill(Color.WHITE);
-
         synchronized (gameController.flights) {
             for (var flight : gameController.flights) {
                 Point2D position = flight.getPosition();
@@ -200,6 +238,10 @@ public class GameView{
                 gc.fillText(flight.toString(), position.getX() - 30, position.getY() + 30, 100);
             }
             updateAircraftList();
+        }
+
+        if (selected==null){
+            inputBox.getChildren().remove(modelButton);
         }
     }
 
@@ -233,15 +275,28 @@ public class GameView{
         VBox card = flightCards.get(flight);
         if (card == null) return;
 
+
+        String alltitude = (flight.getAssignedAltitude()>flight.getCurrAltitude()?
+                " ↑ "+flight.getAssignedAltitude() : flight.getCurrAltitude()> flight.getAssignedAltitude()?
+                " ↓ "+flight.getAssignedAltitude() : "");
+
+        String deg = (flight.getCurrDeg()<flight.getAssignedDeg()?
+                " ↑ "+flight.getAssignedDeg() : flight.getCurrDeg()> flight.getAssignedDeg()?
+                " ↓ "+flight.getAssignedDeg() : "");
+
+        String speed = (flight.getCurrSpeed()<flight.getAssignedSpeed()?
+                " ↑ "+flight.getAssignedSpeed() : flight.getCurrSpeed()> flight.getAssignedSpeed()?
+                " ↓ "+flight.getAssignedSpeed() : "");
+
         for (Node node : card.getChildren()) {
             if (node instanceof Label label) {
                 String text = label.getText();
                 if (text.startsWith("Speed:"))
-                    label.setText("Speed: " + flight.getCurrSpeed());
+                    label.setText("Speed: " + flight.getCurrSpeed()+speed);
                 else if (text.startsWith("Altitude:"))
-                    label.setText("Altitude: " + flight.getCurrAltitude());
+                    label.setText("Altitude: " + flight.getCurrAltitude()+alltitude);
                 else if (text.startsWith("Deg:"))
-                    label.setText("Deg: " + flight.getCurrDeg());
+                    label.setText("Deg: " + flight.getCurrDeg()+deg);
             }
         }
 
@@ -258,6 +313,10 @@ public class GameView{
 
         card.setPickOnBounds(true);
         card.setOnMouseClicked(event -> {
+            if (selected==null){
+                inputBox.getChildren().add(modelButton);
+            }
+
             this.selected=flight;
             altitudeField.setText(String.valueOf(flight.getCurrAltitude()));
             speedField.setText(String.valueOf(flight.getCurrSpeed()));
@@ -294,7 +353,7 @@ public class GameView{
 
 
 
-    private void handleCommand(String command){
+    private void handelApply(String command){
         if (command == null || command.isBlank()) return;
 
         updateHistory(command);
@@ -319,7 +378,7 @@ public class GameView{
             command+="D:"+deg+" ";
         }
 
-        handleCommand(command.strip());
+        handelApply(command.strip());
     }
 
     private void updateHistory(String command){

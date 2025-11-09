@@ -57,56 +57,62 @@ public class Flight {
     public void move(){
         Point2D vector = new Point2D(Math.cos(Math.toRadians(this.currDeg-90)),Math.sin(Math.toRadians(this.currDeg-90)));
         //TODO kitalálni egy jobb közelités majd a sebeség becslésére az arányokktol fügöen
-        vector = vector.multiply((double) currSpeed/100);
+        vector = vector.multiply((double) currSpeed/300);
         this. position=this.position.add(vector);
 
-        //TODO kiszervezni ezt egy fügvénybe hogy átláthatobb legyen és frisiteni a modell adataival
+        adjustCurrentData();
+    }
+
+    private String generateId(){
+        String airline = AIRLINE_CODES[random.nextInt(AIRLINE_CODES.length)];
+        int flightNumber = 100 + random.nextInt(9000);
+        return airline + flightNumber;
+    }
+
+    private void adjustCurrentData(){
+
         if (currDeg!=assignedDeg){
             if (currDeg<assignedDeg){
-                currDeg+=15;
+                currDeg+=2;
                 if(currDeg>assignedDeg){
                     currDeg=assignedDeg;
                 }
             }else {
-                currDeg-=15;
+                currDeg-=2;
                 if(currDeg<assignedDeg){
                     currDeg=assignedDeg;
                 }
             }
         }
+
         if (currSpeed!=assignedSpeed){
-            if (currDeg<assignedSpeed){
-                currSpeed+=1;
+            if (currSpeed<assignedSpeed){
+                currSpeed+=type.accRate/3;
                 if (currSpeed>assignedSpeed){
                     currSpeed=assignedSpeed;
                 }
             }else {
-                currSpeed-=1;
+                currSpeed-=type.accRate/3;
                 if (currSpeed<assignedSpeed){
                     currSpeed=assignedSpeed;
                 }
             }
         }
+
         if (currAltitude!=assignedAltitude){
             if (currAltitude<assignedAltitude){
-                currAltitude+=150;
+                currAltitude+=type.climbRate;
                 if (currAltitude>assignedAltitude){
                     currAltitude=assignedAltitude;
                 }
             }else {
-                currAltitude-=150;
+                currAltitude-=type.climbRate;
                 if (currAltitude<assignedAltitude){
                     currAltitude=assignedAltitude;
                 }
             }
         }
 
-    }
-
-    private String generateId(){
-        String airline = AIRLINE_CODES[random.nextInt(AIRLINE_CODES.length)];
-        int flightNumber = 100 + random.nextInt(9000); // 3–4 digit number
-        return airline + flightNumber;
     }
 
 
@@ -142,7 +148,7 @@ public class Flight {
     }
 
     public void setAssignedSpeed(int speed){
-        if (speed> 320 /*this.type.topSpeed*/){
+        if (speed> this.type.topSpeed ){
             this.assignedSpeed = this.type.topSpeed;
         }else if (speed< 160){
             this.assignedSpeed=160;
@@ -160,7 +166,7 @@ public class Flight {
     }
 
     public void setAssignedAltitude(int altitude){
-        if (altitude > 20000 /*this.type.maxAltitude*/){
+        if (altitude > this.type.maxAltitude ){
             this.assignedAltitude = this.type.maxAltitude;
         } else if (altitude < 1000) {
             this.assignedAltitude=1000;

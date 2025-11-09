@@ -8,8 +8,13 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.example.Controller.ACModelController;
 import org.example.Controller.GameController;
+import org.example.Model.AirPort;
 import org.example.Model.Flight;
+import org.example.Model.Point;
+import org.example.Model.Runway;
 import org.example.View.GameView;
+
+import java.util.List;
 
 /**
  * JavaFX App
@@ -24,8 +29,10 @@ public class App extends Application {
         GameController gameController= GameController.getInstance(gameView);
         ACModelController acModelController=ACModelController.getInstance();
 
+        gameController.airPort=AirPort.getAirportByName("Bravo Regional");
 
-        gameController.flights.add(new Flight(0,180,15000,
+
+        gameController.flights.add(new Flight(0,220,15000,
                 acModelController.getRandom(),new Point2D(500,600)));
         gameController.flights.add(new Flight(279,320,15000,
                 acModelController.getRandom(),new Point2D(1200,300)));

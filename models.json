@@ -4,104 +4,104 @@
     "topSpeed": 470,
     "maxAltitude": 39000,
     "climbRate": 30,
-    "accRate": 14
+    "accRate": 9
   },
   {
     "name": "Boeing 737-800",
     "topSpeed": 473,
     "maxAltitude": 41000,
     "climbRate": 28,
-    "accRate": 13
+    "accRate": 6
   },
   {
     "name": "Embraer E175",
     "topSpeed": 470,
     "maxAltitude": 41000,
     "climbRate": 33,
-    "accRate": 16
+    "accRate": 9
   },
   {
     "name": "Bombardier CRJ-700",
     "topSpeed": 470,
     "maxAltitude": 41000,
     "climbRate": 30,
-    "accRate": 15
+    "accRate": 9
   },
   {
     "name": "Cessna Citation CJ4",
     "topSpeed": 450,
     "maxAltitude": 45000,
     "climbRate": 58,
-    "accRate": 22
+    "accRate": 12
   },
   {
     "name": "Pilatus PC-12",
     "topSpeed": 285,
     "maxAltitude": 30000,
     "climbRate": 20,
-    "accRate": 8
+    "accRate": 6
   },
   {
     "name": "Cessna 172 Skyhawk",
     "topSpeed": 163,
     "maxAltitude": 13000,
     "climbRate": 12,
-    "accRate": 6
+    "accRate": 3
   },
   {
     "name": "Beechcraft King Air 350",
     "topSpeed": 313,
     "maxAltitude": 35000,
     "climbRate": 28,
-    "accRate": 10
+    "accRate": 3
   },
   {
     "name": "ATR 72-600",
     "topSpeed": 280,
     "maxAltitude": 25000,
     "climbRate": 22,
-    "accRate": 9
+    "accRate": 3
   },
   {
     "name": "De Havilland DHC-8 Q400",
     "topSpeed": 360,
     "maxAltitude": 27000,
     "climbRate": 23,
-    "accRate": 11
+    "accRate": 6
   },
   {
     "name": "Boeing 757-200",
     "topSpeed": 530,
     "maxAltitude": 42000,
     "climbRate": 42,
-    "accRate": 18
+    "accRate": 9
   },
   {
     "name": "Airbus A321neo",
     "topSpeed": 470,
     "maxAltitude": 39000,
     "climbRate": 35,
-    "accRate": 16
+    "accRate": 9
   },
   {
     "name": "Gulfstream G650",
     "topSpeed": 516,
     "maxAltitude": 51000,
     "climbRate": 67,
-    "accRate": 25
+    "accRate": 12
   },
   {
     "name": "Learjet 75",
     "topSpeed": 465,
     "maxAltitude": 51000,
     "climbRate": 75,
-    "accRate": 27
+    "accRate": 12
   },
   {
     "name": "Airbus A220-300",
     "topSpeed": 470,
     "maxAltitude": 41000,
     "climbRate": 37,
-    "accRate": 17
+    "accRate": 9
   }
 ]

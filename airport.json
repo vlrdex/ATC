@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Alpha International",
+    "runways": [
+      {
+        "endPoints": [
+          { "name": "L09", "point2D": { "x": 540, "y": 330 }, "type": "runway" },
+          { "name": "R27", "point2D": { "x": 740, "y": 330 }, "type": "runway" }
+        ]
+      },
+      {
+        "endPoints": [
+          { "name": "R18", "point2D": { "x": 640, "y": 260 }, "type": "runway" },
+          { "name": "L36", "point2D": { "x": 640, "y": 460 }, "type": "runway" }
+        ]
+      }
+    ],
+    "nearbyPoints": [
+      { "name": "A01", "point2D": { "x": 640, "y": 50 }, "type": "dest" },
+      { "name": "A02", "point2D": { "x": 640, "y": 670 }, "type": "dest" },
+      { "name": "A03", "point2D": { "x": 50, "y": 360 }, "type": "dest" },
+      { "name": "A04", "point2D": { "x": 1230, "y": 360 }, "type": "dest" },
+
+      { "name": "A10", "point2D": { "x": 80, "y": 80 }, "type": "dest" },
+      { "name": "A11", "point2D": { "x": 1180, "y": 80 }, "type": "dest" },
+      { "name": "A12", "point2D": { "x": 80, "y": 640 }, "type": "dest" },
+      { "name": "A13", "point2D": { "x": 1180, "y": 640 }, "type": "dest" }
+    ]
+  },
+
+  {
+    "name": "Bravo Regional",
+    "runways": [
+      {
+        "endPoints": [
+          { "name": "R04", "point2D": { "x": 600, "y": 300 }, "type": "runway" },
+          { "name": "L22", "point2D": { "x": 680, "y": 420 }, "type": "runway" }
+        ]
+      },
+      {
+        "endPoints": [
+          { "name": "R13", "point2D": { "x": 580, "y": 380 }, "type": "runway" },
+          { "name": "L31", "point2D": { "x": 720, "y": 260 }, "type": "runway" }
+        ]
+      }
+    ],
+    "nearbyPoints": [
+      { "name": "B01", "point2D": { "x": 640, "y": 45 }, "type": "dest" },
+      { "name": "B02", "point2D": { "x": 640, "y": 675 }, "type": "dest" },
+      { "name": "B03", "point2D": { "x": 40, "y": 360 }, "type": "dest" },
+      { "name": "B04", "point2D": { "x": 1240, "y": 360 }, "type": "dest" },
+
+      { "name": "B10", "point2D": { "x": 90, "y": 90 }, "type": "dest" },
+      { "name": "B11", "point2D": { "x": 1190, "y": 90 }, "type": "dest" },
+      { "name": "B12", "point2D": { "x": 90, "y": 630 }, "type": "dest" },
+      { "name": "B13", "point2D": { "x": 1190, "y": 630 }, "type": "dest" }
+    ]
+  }
+]
