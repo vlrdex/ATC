@@ -1,6 +1,10 @@
 package org.example.View;
 
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
@@ -19,6 +23,7 @@ import org.example.Model.Flight;
 import org.example.Model.Point;
 import org.example.Model.Runway;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +35,7 @@ public class GameView{
     private GraphicsContext gc;
     private Stage stage;
     private Stage modelStage;
+    private List<String> pointNames=new ArrayList<>();
 
 
     //for terminal
@@ -43,7 +49,8 @@ public class GameView{
     private VBox aircraftListContainer;
     private VBox inputBox;
     private final Map<Flight, VBox> flightCards = new HashMap<>();
-    private TextField altitudeField, speedField, degField, headingField;
+    private TextField altitudeField, speedField, degField;
+    private ComboBox<String> headingField;
     private Button applyButton;
     private Button modelButton;
 
@@ -54,6 +61,14 @@ public class GameView{
     public GameView(Stage stage){
         this.gameController=GameController.getInstance(this);
         this.stage=stage;
+
+        pointNames=new ArrayList<>(
+                gameController.airPort.getNearbyPoints().stream().map(Point::getName).toList()
+        );
+        for (Runway runway:gameController.airPort.getRunways()){
+            pointNames.addAll(runway.getEndPoints().stream().map(Point::getName).toList());
+        }
+
         stage.setScene(init());
 
         updateAircraftList();
@@ -67,6 +82,9 @@ public class GameView{
 
         timer.start();
 
+        stage.getScene().getStylesheets().add(
+                getClass().getResource("/comboBox.css").toExternalForm()
+        );
         stage.setMinWidth(1280);
         stage.setMinHeight(720);
         stage.show();
@@ -144,7 +162,74 @@ public class GameView{
         altitudeField = createStyledTextField("Altitude");
         speedField = createStyledTextField("Speed");
         degField = createStyledTextField("Deg");
-        headingField = createStyledTextField("Heading");
+
+
+        ObservableList<String> options = FXCollections.observableArrayList(pointNames);
+        FilteredList<String> filteredOptions = new FilteredList<>(options, s -> true);
+
+        headingField = new ComboBox<>(filteredOptions);
+        headingField.setEditable(true);
+
+            headingField.setStyle("""
+                -fx-background-color: #1b1b1b;
+                -fx-background-radius: 5;
+                -fx-border-color: #00e5ff;
+                -fx-border-radius: 5;
+                -fx-border-width: 1;
+    """);
+
+            headingField.getEditor().setStyle("""
+                -fx-text-fill: white;
+                -fx-background-color: #1b1b1b;
+                -fx-prompt-text-fill: gray;
+    """);
+
+
+        final boolean[] isFiltering = {false};
+        final boolean[] isSelecting={false};
+
+
+        headingField.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+            if (isFiltering[0] || isSelecting[0]) return;  // <-- IMPORTANT
+
+            isFiltering[0] = true;
+
+            if (newText.isBlank() || newText.length() < oldText.length()) {
+                filteredOptions.setPredicate(e -> true);
+            }
+
+            String filter = newText.toLowerCase();
+
+            filteredOptions.setPredicate(item ->
+                    filter.isEmpty() || item.toLowerCase().contains(filter)
+            );
+
+            if (!filteredOptions.isEmpty() && !headingField.isShowing()) {
+                headingField.show();
+            } else if (filteredOptions.isEmpty()) {
+                headingField.hide();
+            }
+
+            isFiltering[0] = false;
+        });
+
+
+
+        headingField.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                isSelecting[0] = true;
+
+                headingField.getEditor().setText(newVal);
+                headingField.getEditor().positionCaret(newVal.length());
+
+                filteredOptions.setPredicate(s -> true);
+
+                isSelecting[0] = false;
+            }
+        });
+
+
+
 
         applyButton = new Button("Apply Changes");
         applyButton.setStyle(
@@ -210,9 +295,12 @@ public class GameView{
         gc.fillRect(0, 0, 1280, 720);
 
         AirPort airPort=gameController.airPort;
+
         gc.setStroke(Color.WHITE);
+
         for (Runway runway: airPort.getRunways()){
             List<Point> point=runway.getEndPoints();
+
             gc.strokeLine(point.get(0).getX(),point.get(0).getY()
                 ,point.get(1).getX(),point.get(1).getY()
             );
@@ -231,11 +319,16 @@ public class GameView{
 
         gc.setStroke(Color.WHITE);
         gc.setFill(Color.WHITE);
+
         synchronized (gameController.flights) {
             for (var flight : gameController.flights) {
                 Point2D position = flight.getPosition();
-                gc.strokeOval(position.getX(), position.getY(), 10, 10);
+                gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
                 gc.fillText(flight.toString(), position.getX() - 30, position.getY() + 30, 100);
+
+                Point2D direction=new Point2D(Math.cos(Math.toRadians(flight.getCurrDeg()-90)),Math.sin(Math.toRadians(flight.getCurrDeg()-90))).multiply(600).add(position);
+                gc.strokeLine(position.getX(),position.getY(),direction.getX(),direction.getY());
+
             }
             updateAircraftList();
         }
@@ -366,6 +459,7 @@ public class GameView{
         String altitude=altitudeField.getText();
         String speed=speedField.getText();
         String deg=degField.getText();
+        String heading=headingField.getValue();
 
         String command=selected.getId()+" ";
         if (altitude!=null && !altitude.isBlank()){
@@ -376,6 +470,9 @@ public class GameView{
         }
         if (deg!=null && !deg.isBlank()){
             command+="D:"+deg+" ";
+        }
+        if (heading!=null && !heading.isBlank()){
+            command+="H:"+heading+" ";
         }
 
         handelApply(command.strip());

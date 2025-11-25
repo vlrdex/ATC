@@ -20,6 +20,9 @@ public class Flight {
     private final ACModel type;
     private Point2D position;
 
+    private Point heading;
+    private boolean atDirection=false;
+
     //TODO maradék adatokkal kiegésziteni
 
 
@@ -40,6 +43,7 @@ public class Flight {
         this.assignedAltitude = assignedAltitude;
         this.type = type;
         this.position = position;
+        this.heading=null;
     }
 
     public Flight(int currDeg, int currSpeed, int currAltitude, ACModel type, Point2D position) {
@@ -71,27 +75,67 @@ public class Flight {
 
     private void adjustCurrentData(){
 
-        if (currDeg!=assignedDeg){
-            if (currDeg<assignedDeg){
-                currDeg+=2;
-                if(currDeg>assignedDeg){
-                    currDeg=assignedDeg;
-                }
+        if (!atDirection && (currDeg!=assignedDeg || heading!=null) ){
+            int distance=0;
+            Point2D directionalVector=new Point2D(Math.cos(Math.toRadians(this.currDeg-90)),Math.sin(Math.toRadians(this.currDeg-90)));
+            Point2D destVector;
+
+            if (heading != null){
+                destVector=this.heading.getPoint2D().subtract(this.position).normalize();
             }else {
-                currDeg-=2;
-                if(currDeg<assignedDeg){
+                destVector=new Point2D(Math.cos(Math.toRadians(this.assignedDeg-90)),Math.sin(Math.toRadians(this.assignedDeg-90)));
+            }
+
+
+            distance=calculateAngelWithDirection(directionalVector,destVector);
+
+            System.out.println(distance);
+
+            if (distance>0){
+                if(distance<2){
+                    if (heading!=null){
+                        assignedDeg=currDeg;
+                        atDirection=true;
+                    }
                     currDeg=assignedDeg;
+                }else {
+                    currDeg+=2;
+
+                    if (currDeg>=360){
+                        currDeg-=360;
+                    }
+                }
+
+            }else {
+                if(Math.abs(distance)<2 ){
+                    if (heading!=null){
+                        assignedDeg=currDeg;
+                        atDirection=true;
+                    }
+                    currDeg=assignedDeg;
+                }else {
+                    currDeg-=2;
+                    if (currDeg<0){
+                        currDeg+=360;
+                    }
                 }
             }
+
+            System.out.println(currDeg);
         }
 
+
+
         if (currSpeed!=assignedSpeed){
+
             if (currSpeed<assignedSpeed){
                 currSpeed+=type.accRate/3;
                 if (currSpeed>assignedSpeed){
                     currSpeed=assignedSpeed;
                 }
+
             }else {
+
                 currSpeed-=type.accRate/3;
                 if (currSpeed<assignedSpeed){
                     currSpeed=assignedSpeed;
@@ -99,19 +143,24 @@ public class Flight {
             }
         }
 
+
         if (currAltitude!=assignedAltitude){
+
             if (currAltitude<assignedAltitude){
                 currAltitude+=type.climbRate;
                 if (currAltitude>assignedAltitude){
                     currAltitude=assignedAltitude;
                 }
+
             }else {
                 currAltitude-=type.climbRate;
                 if (currAltitude<assignedAltitude){
                     currAltitude=assignedAltitude;
                 }
             }
+
         }
+
 
     }
 
@@ -185,6 +234,31 @@ public class Flight {
 
     public void setPosition(Point2D p){
         this.position=p;
+    }
+
+    public Point getHeading() {
+        return heading;
+    }
+
+    public void setHeading(Point heading) {
+        this.heading = heading;
+        this.atDirection=false;
+    }
+
+    public int calculateAngelWithDirection(Point2D first,Point2D second){
+        final double deg=Math.toRadians(first.angle(second));
+        final double sin=Math.sin(deg);
+        final double cos=Math.cos(deg);
+
+        final double x=first.getX();
+        final double y=first.getY();
+
+        final Point2D rotated=new Point2D(x*cos-sin*y,sin*x+cos*y);
+        if (rotated.angle(second)<=1){
+            return (int)Math.toDegrees(deg);
+        }else {
+            return (int)-Math.toDegrees(deg);
+        }
     }
 
     @Override

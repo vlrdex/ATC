@@ -52,7 +52,6 @@ public class AirPort {
                         vector = vector.normalize();
                         vector = vector.multiply(120);
 
-                        System.out.println("X: "+vector.getX() + " Y: "+ vector.getY());
                         Point2D ass1 = pair.getKey().getPoint2D().add(vector);
                         Point2D ass2 = ass1.add(vector);
 
@@ -72,6 +71,25 @@ public class AirPort {
             }
         }catch (Exception e){
             e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    public Point getPointByName(String name){
+        for (Point point:this.nearbyPoints){
+            if (point.getName().equals(name)){
+                return point;
+            }
+        }
+
+        for (Runway runway:this.runways){
+            for (Point point : runway.getEndPoints()){
+                if (point.getName().equals(name)){
+                    return point;
+                }
+            }
         }
 
         return null;

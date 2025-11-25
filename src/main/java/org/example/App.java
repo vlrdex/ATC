@@ -15,6 +15,7 @@ import org.example.Model.Runway;
 import org.example.View.GameView;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * JavaFX App
@@ -25,22 +26,23 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        GameView gameView= new GameView(stage);
-        GameController gameController= GameController.getInstance(gameView);
+        GameController gameController= GameController.getInstance();
+        gameController.airPort=AirPort.getAirportByName("Bravo Regional");
         ACModelController acModelController=ACModelController.getInstance();
 
-        gameController.airPort=AirPort.getAirportByName("Bravo Regional");
 
 
-        gameController.flights.add(new Flight(0,220,15000,
+
+        gameController.flights.add(new Flight(40,220,15000,
                 acModelController.getRandom(),new Point2D(500,600)));
-        gameController.flights.add(new Flight(279,320,15000,
+        gameController.flights.add(new Flight(359,320,15000,
                 acModelController.getRandom(),new Point2D(1200,300)));
-        gameController.flights.add(new Flight(90,180,15000,
+        gameController.flights.add(new Flight(310,180,15000,
                 acModelController.getRandom(),new Point2D(100,200)));
 
+        GameView gameView= new GameView(stage);
         gameView.updateAircraftList();
-
+        gameController.setGameView(gameView);
 
         var gameThread = new Thread(new Runnable() {
             @Override
@@ -57,5 +59,6 @@ public class App extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 
 }
