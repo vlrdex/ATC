@@ -8,15 +8,14 @@ import org.example.Utils.ConfigLoader;
 import org.example.Utils.Point2DAdapter;
 
 import java.io.FileReader;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class AirPort {
 
     private String name;
     private List<Runway> runways;
     private List<Point> nearbyPoints;
+
 
     public AirPort(String name, List<Runway> runways, List<Point> nearbyPoints) {
         this.name = name;
@@ -50,6 +49,7 @@ public class AirPort {
                         Pair<Point,Point> pair=new Pair<>(runway.getEndPoints().get(0),runway.getEndPoints().get(1));
                         Point2D vector=new Point2D(pair.getKey().getX()-pair.getValue().getX(),pair.getKey().getY()-pair.getValue().getY());
                         vector = vector.normalize();
+                        runway.setDirVector(vector.multiply(-1));
                         vector = vector.multiply(120);
 
                         Point2D ass1 = pair.getKey().getPoint2D().add(vector);
@@ -92,6 +92,17 @@ public class AirPort {
             }
         }
 
+        return null;
+    }
+
+    public Point getOppositeRunWayPoint(Point runwayPoint){
+        for (Runway runway:this.runways){
+           if (runwayPoint.equals(runway.getEndPoints().get(0))){
+               return runway.getEndPoints().get(1);
+           }else if(runwayPoint.equals(runway.getEndPoints().get(1))) {
+               return runway.getEndPoints().get(0);
+           }
+        }
         return null;
     }
 }

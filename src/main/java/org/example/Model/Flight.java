@@ -1,14 +1,17 @@
 package org.example.Model;
 
 import javafx.geometry.Point2D;
+import org.example.Controller.GameController;
+import org.example.Model.Utils.VectorUtils;
+import org.example.View.GameView;
 
 import java.util.Random;
 
 public class Flight {
     private String id;
     //between 0 and 359
-    private int currDeg;
-    private int assignedDeg;
+    private double currDeg;
+    private double assignedDeg;
 
     //in knots
     private int currSpeed;
@@ -22,6 +25,7 @@ public class Flight {
 
     private Point heading;
     private boolean atDirection=false;
+    private State state;
 
     //TODO maradék adatokkal kiegésziteni
 
@@ -33,7 +37,7 @@ public class Flight {
     private static final Random random = new Random(12);
 
 
-    public Flight(int currDeg, int assignedDeg, int currSpeed, int assignedSpeed, int currAltitude, int assignedAltitude, ACModel type, Point2D position) {
+    public Flight(int currDeg, int assignedDeg, int currSpeed, int assignedSpeed, int currAltitude, int assignedAltitude, ACModel type, Point2D position,State state) {
         this.id=generateId();
         this.currDeg = currDeg;
         this.assignedDeg = assignedDeg;
@@ -44,9 +48,10 @@ public class Flight {
         this.type = type;
         this.position = position;
         this.heading=null;
+        this.state=state;
     }
 
-    public Flight(int currDeg, int currSpeed, int currAltitude, ACModel type, Point2D position) {
+    public Flight(int currDeg, int currSpeed, int currAltitude, ACModel type, Point2D position,State state) {
         this.id=generateId();
         this.currDeg = currDeg;
         this.assignedDeg=currDeg;
@@ -56,15 +61,7 @@ public class Flight {
         this.assignedAltitude=currAltitude;
         this.type = type;
         this.position = position;
-    }
-
-    public void move(){
-        Point2D vector = new Point2D(Math.cos(Math.toRadians(this.currDeg-90)),Math.sin(Math.toRadians(this.currDeg-90)));
-        //TODO kitalálni egy jobb közelités majd a sebeség becslésére az arányokktol fügöen
-        vector = vector.multiply((double) currSpeed/300);
-        this. position=this.position.add(vector);
-
-        adjustCurrentData();
+        this.state=state;
     }
 
     private String generateId(){
@@ -73,33 +70,65 @@ public class Flight {
         return airline + flightNumber;
     }
 
+    public void move(){
+        switch (this.state){
+            case WaitingForTakeOff -> {
+                System.out.println("here");
+                break;
+            }
+            case TakeOff -> {
+                System.out.println("not");
+                takeOff();
+                break;
+            }
+            default -> {
+                adjustCurrentData();
+                break;
+            }
+
+        }
+    }
+
+
+    private void adjustPosition(){
+        Point2D vector = VectorUtils.getNormalizedDirVector(currDeg);
+
+        vector = vector.multiply((double) currSpeed/300);
+        this. position=this.position.add(vector);
+    }
+
+
+
     private void adjustCurrentData(){
 
+        adjustPosition();
+
         if (!atDirection && (currDeg!=assignedDeg || heading!=null) ){
-            int distance=0;
-            Point2D directionalVector=new Point2D(Math.cos(Math.toRadians(this.currDeg-90)),Math.sin(Math.toRadians(this.currDeg-90)));
+            double distance=0;
+            Point2D directionalVector=VectorUtils.getNormalizedDirVector(currDeg);
             Point2D destVector;
 
             if (heading != null){
                 destVector=this.heading.getPoint2D().subtract(this.position).normalize();
             }else {
-                destVector=new Point2D(Math.cos(Math.toRadians(this.assignedDeg-90)),Math.sin(Math.toRadians(this.assignedDeg-90)));
+                destVector=VectorUtils.getNormalizedDirVector(assignedDeg);
             }
 
 
-            distance=calculateAngelWithDirection(directionalVector,destVector);
+            distance= VectorUtils.calculateAngelWithDirection(directionalVector,destVector);
 
-            System.out.println(distance);
 
             if (distance>0){
-                if(distance<2){
+                if(distance<1.5){
                     if (heading!=null){
                         assignedDeg=currDeg;
                         atDirection=true;
+                        currDeg+=distance;
+                    }else{
+                        currDeg=assignedDeg;
                     }
-                    currDeg=assignedDeg;
                 }else {
-                    currDeg+=2;
+                    currDeg+=1.5;
 
                     if (currDeg>=360){
                         currDeg-=360;
@@ -107,21 +136,22 @@ public class Flight {
                 }
 
             }else {
-                if(Math.abs(distance)<2 ){
+                if(Math.abs(distance)<1.5 ){
                     if (heading!=null){
                         assignedDeg=currDeg;
                         atDirection=true;
+                        currDeg+=distance;
+                    }else{
+                        currDeg=assignedDeg;
                     }
-                    currDeg=assignedDeg;
                 }else {
-                    currDeg-=2;
+                    currDeg-=1.5;
                     if (currDeg<0){
                         currDeg+=360;
                     }
                 }
             }
 
-            System.out.println(currDeg);
         }
 
 
@@ -164,27 +194,40 @@ public class Flight {
 
     }
 
+    private void takeOff(){
+        adjustPosition();
+        this.currSpeed+=this.type.accRate/3;
+        if (this.currSpeed>=100){
+            this.currAltitude+=(this.type.climbRate/2);
+        }
+        if (currSpeed>=160){
+            this.state=State.Departing;
+        }
+    }
+
 
 
     public String getId(){
         return this.id;
     }
 
-    public int getCurrDeg() {
+    public double getCurrDeg() {
         return currDeg;
     }
 
-    public int getAssignedDeg() {
+    public double getAssignedDeg() {
         return assignedDeg;
     }
 
-    public void setAssignedDeg(int deg){
-        if (deg < 0){
-            this.assignedDeg=0;
-        } else if (deg > 359) {
-            this.assignedDeg=359;
-        }else {
-            this.assignedDeg=deg;
+    public void setAssignedDeg(double deg){
+        if (this.state!=State.WaitingForTakeOff){
+            if (deg < 0){
+                this.assignedDeg=0;
+            } else if (deg > 359) {
+                this.assignedDeg=359;
+            }else {
+                this.assignedDeg=deg;
+            }
         }
     }
 
@@ -241,28 +284,59 @@ public class Flight {
     }
 
     public void setHeading(Point heading) {
-        this.heading = heading;
-        this.atDirection=false;
+        if (state==State.WaitingForTakeOff){
+
+            if (heading.getType()!= Point.Type.runway){
+                GameController.getInstance().gameView.updateHistory("Invalid point for take off!");
+            }else {
+                Point spawn=GameController.getInstance().airPort.getOppositeRunWayPoint(heading);
+
+                Point2D dirVector=new Point2D(heading.getX()-spawn.getX(), heading.getY()-spawn.getY()).normalize();
+                Point2D baseVector=VectorUtils.getNormalizedDirVector(0);
+
+                Double dist=VectorUtils.calculateAngelWithDirection(baseVector,dirVector);
+                if (dist<0){
+                    this.currDeg=dist+360;
+                    this.assignedDeg=this.currDeg;
+                }else {
+                    this.currDeg=dist;
+                    this.assignedDeg=this.currDeg;
+                }
+                this.position=spawn.getPoint2D();
+                this.state=State.TakeOff;
+            }
+
+        }else {
+
+            this.heading = heading;
+            this.atDirection=false;
+        }
     }
 
-    public int calculateAngelWithDirection(Point2D first,Point2D second){
-        final double deg=Math.toRadians(first.angle(second));
-        final double sin=Math.sin(deg);
-        final double cos=Math.cos(deg);
+    public State getState() {
+        return state;
+    }
 
-        final double x=first.getX();
-        final double y=first.getY();
+    public void setState(State state) {
+        this.state = state;
+    }
 
-        final Point2D rotated=new Point2D(x*cos-sin*y,sin*x+cos*y);
-        if (rotated.angle(second)<=1){
-            return (int)Math.toDegrees(deg);
-        }else {
-            return (int)-Math.toDegrees(deg);
-        }
+    public boolean isArriving(){
+        return state==State.Arriving || state==State.Landing || state==State.Landed;
     }
 
     @Override
     public String toString(){
         return id+" alt: "+currAltitude+"\nspd: "+currSpeed+" deg: "+currDeg;
+    }
+
+    public enum State{
+        Arriving,
+        Landing,
+        Landed,
+        Departing,
+        TakeOff,
+        WaitingForTakeOff,
+        AtDest
     }
 }

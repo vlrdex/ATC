@@ -2,6 +2,8 @@ package org.example.Model;
 
 import javafx.geometry.Point2D;
 
+import java.util.Objects;
+
 public class Point {
     private final String name;
     private final Point2D point2D;
@@ -40,4 +42,13 @@ public class Point {
     public double getY(){
         return point2D.getY();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Point point = (Point) o;
+        return Objects.equals(name, point.name) && Objects.equals(point2D, point.point2D) && type == point.type;
+    }
+
 }

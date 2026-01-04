@@ -1,7 +1,6 @@
 package org.example.View;
 
 import javafx.animation.AnimationTimer;
-import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -22,6 +21,7 @@ import org.example.Model.AirPort;
 import org.example.Model.Flight;
 import org.example.Model.Point;
 import org.example.Model.Runway;
+import org.example.Model.Utils.VectorUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class GameView{
     private VBox inputBox;
     private final Map<Flight, VBox> flightCards = new HashMap<>();
     private TextField altitudeField, speedField, degField;
-    private ComboBox<String> headingField;
+    private ComboBox<String> headingInput;
     private Button applyButton;
     private Button modelButton;
 
@@ -117,7 +117,7 @@ public class GameView{
 
         ScrollPane scrollPane = new ScrollPane(terminalHistory);
         scrollPane.setFitToWidth(true);
-        scrollPane.setPrefHeight(100);  // fixed height
+        scrollPane.setPrefHeight(100);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
 
@@ -167,10 +167,10 @@ public class GameView{
         ObservableList<String> options = FXCollections.observableArrayList(pointNames);
         FilteredList<String> filteredOptions = new FilteredList<>(options, s -> true);
 
-        headingField = new ComboBox<>(filteredOptions);
-        headingField.setEditable(true);
+        headingInput = new ComboBox<>(filteredOptions);
+        headingInput.setEditable(true);
 
-            headingField.setStyle("""
+            headingInput.setStyle("""
                 -fx-background-color: #1b1b1b;
                 -fx-background-radius: 5;
                 -fx-border-color: #00e5ff;
@@ -178,7 +178,7 @@ public class GameView{
                 -fx-border-width: 1;
     """);
 
-            headingField.getEditor().setStyle("""
+            headingInput.getEditor().setStyle("""
                 -fx-text-fill: white;
                 -fx-background-color: #1b1b1b;
                 -fx-prompt-text-fill: gray;
@@ -189,7 +189,7 @@ public class GameView{
         final boolean[] isSelecting={false};
 
 
-        headingField.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+        headingInput.getEditor().textProperty().addListener((obs, oldText, newText) -> {
             if (isFiltering[0] || isSelecting[0]) return;  // <-- IMPORTANT
 
             isFiltering[0] = true;
@@ -204,10 +204,10 @@ public class GameView{
                     filter.isEmpty() || item.toLowerCase().contains(filter)
             );
 
-            if (!filteredOptions.isEmpty() && !headingField.isShowing()) {
-                headingField.show();
+            if (!filteredOptions.isEmpty() && !headingInput.isShowing()) {
+                headingInput.show();
             } else if (filteredOptions.isEmpty()) {
-                headingField.hide();
+                headingInput.hide();
             }
 
             isFiltering[0] = false;
@@ -215,12 +215,12 @@ public class GameView{
 
 
 
-        headingField.valueProperty().addListener((obs, oldVal, newVal) -> {
+        headingInput.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 isSelecting[0] = true;
 
-                headingField.getEditor().setText(newVal);
-                headingField.getEditor().positionCaret(newVal.length());
+                headingInput.getEditor().setText(newVal);
+                headingInput.getEditor().positionCaret(newVal.length());
 
                 filteredOptions.setPredicate(s -> true);
 
@@ -250,7 +250,7 @@ public class GameView{
         });
 
 
-        inputBox = new VBox(8, altitudeField, speedField, degField, headingField, applyButton);
+        inputBox = new VBox(8, altitudeField, speedField, degField, headingInput, applyButton);
         inputBox.setPadding(new Insets(10, 0, 0, 0));
 
         controlPanel.getChildren().addAll(controlTitle, aircraftScroll, inputBox);
@@ -291,9 +291,11 @@ public class GameView{
     }
 
     public void render() {
+        //Draws the background
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, 1280, 720);
 
+        //Draws the airport
         AirPort airPort=gameController.airPort;
 
         gc.setStroke(Color.WHITE);
@@ -309,6 +311,7 @@ public class GameView{
             gc.strokeText(point.get(1).getName(),point.get(1).getX()-20,point.get(1).getY()-20);
         }
 
+        //draws the dest points and assist points
         gc.setFill(Color.WHITE);
         for (Point point:airPort.getNearbyPoints()){
             gc.fillRect(point.getX(), point.getY(), 2,5);
@@ -316,19 +319,20 @@ public class GameView{
         }
 
 
-
+        //Draws the planes
         gc.setStroke(Color.WHITE);
         gc.setFill(Color.WHITE);
 
         synchronized (gameController.flights) {
             for (var flight : gameController.flights) {
-                Point2D position = flight.getPosition();
-                gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
-                gc.fillText(flight.toString(), position.getX() - 30, position.getY() + 30, 100);
+                if (flight.getState()!= Flight.State.WaitingForTakeOff){
+                    Point2D position = flight.getPosition();
+                    gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
+                    gc.fillText(flight.toString(), position.getX() - 30, position.getY() + 30, 100);
 
-                Point2D direction=new Point2D(Math.cos(Math.toRadians(flight.getCurrDeg()-90)),Math.sin(Math.toRadians(flight.getCurrDeg()-90))).multiply(600).add(position);
-                gc.strokeLine(position.getX(),position.getY(),direction.getX(),direction.getY());
-
+                    Point2D direction= VectorUtils.getNormalizedDirVector(flight.getCurrDeg()).multiply(600).add(position);
+                    gc.strokeLine(position.getX(),position.getY(),direction.getX(),direction.getY());
+                }
             }
             updateAircraftList();
         }
@@ -343,6 +347,7 @@ public class GameView{
 
     public void updateAircraftList() {
 
+        //puts in new flights
         for (Flight flight : gameController.flights) {
             if (!flightCards.containsKey(flight)) {
                 VBox card = createFlightCard(flight);
@@ -351,6 +356,7 @@ public class GameView{
             }
         }
 
+        //removes flight
         flightCards.keySet().removeIf(f -> {
             if (!gameController.flights.contains(f)) {
                 aircraftListContainer.getChildren().remove(flightCards.get(f));
@@ -390,13 +396,24 @@ public class GameView{
                     label.setText("Altitude: " + flight.getCurrAltitude()+alltitude);
                 else if (text.startsWith("Deg:"))
                     label.setText("Deg: " + flight.getCurrDeg()+deg);
+                else if (text.startsWith("Heading:")) {
+                    label.setText("Heading: " + (flight.getHeading()!=null ? flight.getHeading().getName():"none"));
+                }
             }
         }
 
         if (flight == selected) {
-            card.setStyle("-fx-background-color: #1379ee; -fx-background-radius: 8; -fx-border-color: #555;");
+            if (flight.isArriving()){
+                card.setStyle("-fx-background-color: #563521; -fx-background-radius: 8; -fx-border-color: #555;");
+            }else {
+                card.setStyle("-fx-background-color: #41572f; -fx-background-radius: 8; -fx-border-color: #555;");
+            }
         } else {
-            card.setStyle("-fx-background-color: #3a3a3a; -fx-background-radius: 8; -fx-border-color: #555;");
+            if (flight.isArriving()){
+                card.setStyle("-fx-background-color: #cb601c; -fx-background-radius: 8; -fx-border-color: #555;");
+            }else {
+                card.setStyle("-fx-background-color: #5cbd11; -fx-background-radius: 8; -fx-border-color: #555;");
+            }
         }
     }
 
@@ -411,36 +428,50 @@ public class GameView{
             }
 
             this.selected=flight;
-            altitudeField.setText(String.valueOf(flight.getCurrAltitude()));
-            speedField.setText(String.valueOf(flight.getCurrSpeed()));
-            degField.setText(String.valueOf(flight.getCurrDeg()));
-            //headingField.setText(flight.getHeadingTo() != null ? flight.getHeadingTo().getName() : ""); (nincs még meg az adatag)
+            altitudeField.setText(String.valueOf(flight.getAssignedAltitude()));
+            speedField.setText(String.valueOf(flight.getAssignedSpeed()));
+            degField.setText(String.valueOf(flight.getAssignedDeg()));
+            headingInput.getEditor().setText(flight.getHeading() != null ? flight.getHeading().getName() : "");
 
         });
-        card.setStyle(
-                "-fx-background-color: #3a3a3a; " +
-                        "-fx-background-radius: 8; " +
-                        "-fx-border-color: #555; " +
-                        "-fx-border-radius: 8;"
-        ); //TODO ha kész a rpülök státusza az alapján formázni a szineket
+
+        if (flight.isArriving()){
+            card.setStyle(
+                    "-fx-background-color: #cb601c;"+
+                            "-fx-background-radius: 8; " +
+                            "-fx-border-color: #555; " +
+                            "-fx-border-radius: 8;"
+            );
+        }else {
+            card.setStyle(
+                    "-fx-background-color: #5cbd11;"+
+                            "-fx-background-radius: 8; " +
+                            "-fx-border-color: #555; " +
+                            "-fx-border-radius: 8;"
+            );
+        }
+
 
 
         Label nameLabel = new Label("Flight: " + flight.getId());
         nameLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
 
         Label speedLabel = new Label("Speed: " + flight.getCurrSpeed());
-        speedLabel.setStyle("-fx-text-fill: lightgray;");
+        speedLabel.setStyle("-fx-text-fill: white;");
 
         Label altLabel = new Label("Altitude: " + flight.getCurrAltitude());
-        altLabel.setStyle("-fx-text-fill: lightgray;");
+        altLabel.setStyle("-fx-text-fill: white;");
 
         Label degLabel = new Label("Deg: " + flight.getCurrDeg());
-        degLabel.setStyle("-fx-text-fill: lightgray;");
+        degLabel.setStyle("-fx-text-fill: white;");
+
+        Label headingLabel=new Label("Heading: " + (flight.getHeading()!=null ? flight.getHeading().getName():"none"));
+        headingLabel.setStyle("-fx-text-fill: white;");
 
         Label modelLabel = new Label("Model: " + flight.getType().name);
-        degLabel.setStyle("-fx-text-fill: lightgray;");
+        degLabel.setStyle("-fx-text-fill: white;");
 
-        card.getChildren().addAll(nameLabel, speedLabel, altLabel, degLabel,modelLabel);
+        card.getChildren().addAll(nameLabel, speedLabel, altLabel, degLabel,headingLabel,modelLabel);
         return card;
     }
 
@@ -459,7 +490,7 @@ public class GameView{
         String altitude=altitudeField.getText();
         String speed=speedField.getText();
         String deg=degField.getText();
-        String heading=headingField.getValue();
+        String heading= headingInput.getValue();
 
         String command=selected.getId()+" ";
         if (altitude!=null && !altitude.isBlank()){
@@ -478,7 +509,7 @@ public class GameView{
         handelApply(command.strip());
     }
 
-    private void updateHistory(String command){
+    public void updateHistory(String command){
         terminalHistory.appendText(command + "\n");
         terminalHistory.setScrollTop(Double.MAX_VALUE);
     }

@@ -33,12 +33,12 @@ public class App extends Application {
 
 
 
-        gameController.flights.add(new Flight(40,220,15000,
-                acModelController.getRandom(),new Point2D(500,600)));
+        gameController.flights.add(new Flight(40,0,0,
+                acModelController.getRandom(),null, Flight.State.WaitingForTakeOff));
         gameController.flights.add(new Flight(359,320,15000,
-                acModelController.getRandom(),new Point2D(1200,300)));
+                acModelController.getRandom(),new Point2D(1200,300), Flight.State.Arriving));
         gameController.flights.add(new Flight(310,180,15000,
-                acModelController.getRandom(),new Point2D(100,200)));
+                acModelController.getRandom(),new Point2D(100,200), Flight.State.Arriving));
 
         GameView gameView= new GameView(stage);
         gameView.updateAircraftList();

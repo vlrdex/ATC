@@ -85,10 +85,14 @@ public class GameController {
 
             synchronized (flights){
                 for (Flight flight : flights){
+
                     if (flight.getId().equals(id)){
+
                         for (int i=1;i<commands.length;i++){
+
                             String type=commands[i].split(":")[0];
                             String value =commands[i].split(":")[1];
+
                             switch (type){
                                 case "A":
                                     flight.setAssignedAltitude(Integer.parseInt(value));
@@ -97,18 +101,19 @@ public class GameController {
                                     flight.setAssignedSpeed(Integer.parseInt(value));
                                     break;
                                 case "D":
-                                    flight.setAssignedDeg(Integer.parseInt(value));
+                                    flight.setAssignedDeg(Double.parseDouble(value));
                                     break;
                                 case "H":
-                                    flight.setHeading(airPort.getPointByName(commands[i].split(":")[1]));
+                                    flight.setHeading(airPort.getPointByName(value));
                                     break;
                             }
                         }
                         break;
-
                     }
+
                 }
             }
+
         }
 
         
