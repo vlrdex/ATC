@@ -25,4 +25,28 @@ public class VectorUtils {
     public static Point2D getNormalizedDirVector(double deg){
         return new Point2D(Math.cos(Math.toRadians(deg-90)),Math.sin(Math.toRadians(deg-90)));
     }
+
+
+    public static boolean calculateIfPointIsInside(Point2D assist1,Point2D assist2,Point2D underTest){
+
+        Point2D vector = assist2.subtract(assist1).normalize();
+        Point2D rotatedVector=new Point2D(-vector.getY(),vector.getX());
+        Point2D A=assist1.add(rotatedVector.multiply(50));
+        Point2D B=A.add(vector.multiply(140));
+        Point2D D=assist1.add(rotatedVector.multiply(-50));
+
+        Point2D AB=B.subtract(A);
+        Point2D AD=D.subtract(A);
+        Point2D AP=underTest.subtract(A);
+
+        if (0<= AP.dotProduct(AB) && AP.dotProduct(AB) <= AB.dotProduct(AB)
+            && 0<= AP.dotProduct(AD) && AP.dotProduct(AD) <=AD.dotProduct(AD)
+        ){
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+
 }

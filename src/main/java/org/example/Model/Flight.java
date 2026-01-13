@@ -1,6 +1,7 @@
 package org.example.Model;
 
 import javafx.geometry.Point2D;
+import javafx.util.Pair;
 import org.example.Controller.GameController;
 import org.example.Model.Utils.VectorUtils;
 import org.example.View.GameView;
@@ -73,11 +74,9 @@ public class Flight {
     public void move(){
         switch (this.state){
             case WaitingForTakeOff -> {
-                System.out.println("here");
                 break;
             }
             case TakeOff -> {
-                System.out.println("not");
                 takeOff();
                 break;
             }
@@ -284,33 +283,53 @@ public class Flight {
     }
 
     public void setHeading(Point heading) {
-        if (state==State.WaitingForTakeOff){
 
-            if (heading.getType()!= Point.Type.runway){
-                GameController.getInstance().gameView.updateHistory("Invalid point for take off!");
-            }else {
-                Point spawn=GameController.getInstance().airPort.getOppositeRunWayPoint(heading);
-
-                Point2D dirVector=new Point2D(heading.getX()-spawn.getX(), heading.getY()-spawn.getY()).normalize();
-                Point2D baseVector=VectorUtils.getNormalizedDirVector(0);
-
-                Double dist=VectorUtils.calculateAngelWithDirection(baseVector,dirVector);
-                if (dist<0){
-                    this.currDeg=dist+360;
-                    this.assignedDeg=this.currDeg;
+        switch (state){
+            case WaitingForTakeOff -> {
+                if (heading.getType()!= Point.Type.runway){
+                    GameController.getInstance().gameView.updateHistory("Invalid point for take off!");
                 }else {
-                    this.currDeg=dist;
-                    this.assignedDeg=this.currDeg;
+                    Point spawn=GameController.getInstance().airPort.getOppositeRunWayPoint(heading);
+
+                    Point2D dirVector=new Point2D(heading.getX()-spawn.getX(), heading.getY()-spawn.getY()).normalize();
+                    Point2D baseVector=VectorUtils.getNormalizedDirVector(0);
+
+                    Double dist=VectorUtils.calculateAngelWithDirection(baseVector,dirVector);
+                    if (dist<0){
+                        this.currDeg=dist+360;
+                        this.assignedDeg=this.currDeg;
+                    }else {
+                        this.currDeg=dist;
+                        this.assignedDeg=this.currDeg;
+                    }
+                    this.position=spawn.getPoint2D();
+                    this.state=State.TakeOff;
                 }
-                this.position=spawn.getPoint2D();
-                this.state=State.TakeOff;
+            }
+            case Arriving -> {
+                if (heading.getType()== Point.Type.runway && assignedSpeed ==160 && currAltitude<=3000 && assignedAltitude==1000){
+                    Pair<Point,Point> pair=GameController.getInstance().airPort.getAssistPoints(heading);
+
+
+                    if (pair!=null){
+                        if (VectorUtils.calculateIfPointIsInside(pair.getKey().getPoint2D(), pair.getValue().getPoint2D(), this.getPosition())){
+                            this.state=State.Landing;
+                        }
+                    }
+                }
+
+
+                    this.heading = heading;
+                    this.atDirection=false;
+
+            }
+            default -> {
+                this.heading = heading;
+                this.atDirection=false;
             }
 
-        }else {
-
-            this.heading = heading;
-            this.atDirection=false;
         }
+
     }
 
     public State getState() {

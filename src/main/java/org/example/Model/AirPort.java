@@ -105,4 +105,25 @@ public class AirPort {
         }
         return null;
     }
+
+    public Pair<Point,Point> getAssistPoints(Point point){
+        if (point.getType()!= Point.Type.runway){
+            return null;
+        }
+        List<Point> points=nearbyPoints.stream().filter(
+                e->{
+                    return e.getName().startsWith(point.getName()) && (e.getType() == Point.Type.near_assist || e.getType() == Point.Type.far_assist);
+                })
+                .toList();
+
+        if (points.size()==2){
+            if (points.get(0).getType()== Point.Type.near_assist){
+                return new Pair<>(points.get(0),points.get(1));
+            }else {
+                return new Pair<>(points.get(1),points.get(0));
+            }
+        }
+
+        return null;
+    }
 }
