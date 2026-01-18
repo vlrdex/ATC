@@ -31,9 +31,9 @@ public class VectorUtils {
 
         Point2D vector = assist2.subtract(assist1).normalize();
         Point2D rotatedVector=new Point2D(-vector.getY(),vector.getX());
-        Point2D A=assist1.add(rotatedVector.multiply(50));
+        Point2D A=assist1.add(rotatedVector.multiply(30));
         Point2D B=A.add(vector.multiply(140));
-        Point2D D=assist1.add(rotatedVector.multiply(-50));
+        Point2D D=assist1.add(rotatedVector.multiply(-30));
 
         Point2D AB=B.subtract(A);
         Point2D AD=D.subtract(A);
@@ -47,6 +47,9 @@ public class VectorUtils {
             return false;
         }
     }
+
+
+
 
 
 }

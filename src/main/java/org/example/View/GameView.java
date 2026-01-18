@@ -395,7 +395,7 @@ public class GameView{
                 else if (text.startsWith("Altitude:"))
                     label.setText("Altitude: " + flight.getCurrAltitude()+alltitude);
                 else if (text.startsWith("Deg:"))
-                    label.setText("Deg: " + flight.getCurrDeg()+deg);
+                    label.setText(String.format("Deg: %.2f", flight.getCurrDeg())+deg);
                 else if (text.startsWith("Heading:")) {
                     label.setText("Heading: " + (flight.getHeading()!=null ? flight.getHeading().getName():"none"));
                 }
@@ -462,7 +462,9 @@ public class GameView{
         Label altLabel = new Label("Altitude: " + flight.getCurrAltitude());
         altLabel.setStyle("-fx-text-fill: white;");
 
-        Label degLabel = new Label("Deg: " + flight.getCurrDeg());
+        Label degLabel = new Label(
+                String.format("Deg: %.2f", flight.getCurrDeg())
+        );
         degLabel.setStyle("-fx-text-fill: white;");
 
         Label headingLabel=new Label("Heading: " + (flight.getHeading()!=null ? flight.getHeading().getName():"none"));

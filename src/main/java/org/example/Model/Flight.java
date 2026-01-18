@@ -80,6 +80,9 @@ public class Flight {
                 takeOff();
                 break;
             }
+            case Landing -> {
+                landingLogic();
+            }
             default -> {
                 adjustCurrentData();
                 break;
@@ -191,6 +194,17 @@ public class Flight {
         }
 
 
+    }
+
+    private void landingLogic(){
+        if (this.position.distance(this.heading.getPoint2D()) <=5){
+            this.heading=GameController.getInstance().airPort.getOppositeRunWayPoint(this.heading);
+            this.assignedAltitude=0;
+        }
+        if (this.currAltitude==0){
+            this.assignedSpeed=0;
+        }
+        adjustCurrentData();
     }
 
     private void takeOff(){
@@ -314,6 +328,7 @@ public class Flight {
                     if (pair!=null){
                         if (VectorUtils.calculateIfPointIsInside(pair.getKey().getPoint2D(), pair.getValue().getPoint2D(), this.getPosition())){
                             this.state=State.Landing;
+                            this.assignedAltitude=200;
                         }
                     }
                 }
@@ -322,6 +337,12 @@ public class Flight {
                     this.heading = heading;
                     this.atDirection=false;
 
+            }
+            case Landing -> {
+                this.heading=heading;
+                this.setAssignedSpeed(this.assignedSpeed);
+                this.setAssignedAltitude(this.assignedAltitude);
+                this.state=State.Arriving;
             }
             default -> {
                 this.heading = heading;
