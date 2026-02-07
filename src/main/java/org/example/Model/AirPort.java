@@ -9,6 +9,7 @@ import org.example.Utils.Point2DAdapter;
 
 import java.io.FileReader;
 import java.util.List;
+import java.util.Random;
 
 public class AirPort {
 
@@ -125,5 +126,19 @@ public class AirPort {
         }
 
         return null;
+    }
+
+    public Point getRandomDest(){
+        Random random=new Random();
+        Point point;
+        while (true){
+            point = nearbyPoints.get(random.nextInt(nearbyPoints.size()));
+
+            if (point.getType()!= Point.Type.far_assist && point.getType()!= Point.Type.far_assist){
+                return point;
+            }
+
+        }
+
     }
 }

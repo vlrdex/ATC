@@ -1,18 +1,23 @@
 package org.example.Controller;
 
-import org.example.Model.AirPort;
-import org.example.Model.Flight;
+import javafx.geometry.Point2D;
+import org.example.Model.*;
+import org.example.Model.Utils.VectorUtils;
 import org.example.View.GameView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GameController {
-    public List<Flight> flights = new ArrayList<>();
+    private List<Flight> flights = new ArrayList<>();
     public AirPort airPort;
     private boolean isRunning=false;
     public GameView gameView;
 
+    private DifficultySettings difficultySettings;
+
+    private final Random random=new Random();
     private static GameController instace;
 
 
@@ -51,7 +56,7 @@ public class GameController {
 
     private void gameLoop(){
         long lastUpdateTime = System.currentTimeMillis();
-        long interval = 1000;
+        long interval = 100;
 
         while (isRunning) {
             long currentTime = System.currentTimeMillis();
@@ -60,8 +65,25 @@ public class GameController {
             if (currentTime - lastUpdateTime >= interval) {
 
                 synchronized (flights){
+                    if (flights.size()<difficultySettings.getMaxFlights()){
+                        if (random.nextInt(100)==1){
+                            flights.add(generateRandomFlight());
+                        }
+                    }
+
+                    List<Flight> flightsToRemove= new ArrayList<>();
+
+
                     for (Flight flight : flights) {
+                        if (flight.getState()== Flight.State.Landed || flight.getState()== Flight.State.AtDest){
+                            flightsToRemove.add(flight);
+                            continue;
+                        }
                         flight.move();
+                    }
+
+                    for (Flight flight : flightsToRemove) {
+                        flights.remove(flight);
                     }
                 }
 
@@ -119,7 +141,56 @@ public class GameController {
         
     }
 
+    private Flight generateRandomFlight(){
+        if (difficultySettings.currDepartingFlights==difficultySettings.getMaxDepartingFlights()){
+            return generateArriving();
+        }
+        if (difficultySettings.currArrivingFlights==difficultySettings.getMaxArrivingFlights()){
+            return generateDeparting();
+        }
+        if (random.nextBoolean()){ // if true it generates departing flight;
+            return generateDeparting();
+        }else {
+            return generateArriving();
+        }
+    }
+
+    private Flight generateDeparting(){
+        Flight flight = new Flight(0,0,0, ACModelController.getInstance().getRandom(), null, Flight.State.WaitingForTakeOff);
+        flight.setDestination(airPort.getRandomDest());
+        return flight;
+    }
+
+    private Flight generateArriving(){
+        Point2D spawn= VectorUtils.getRandomPointForSpawning();
+        double deg=VectorUtils.angleTo(spawn,new Point2D(
+                100 + random.nextDouble() * (1280 - 200),
+                100 + random.nextDouble() * (720 - 200)
+        ));
+        ACModel model= ACModelController.getInstance().getRandom();
+
+        return new Flight(deg,(int)(160+random.nextDouble()*(model.topSpeed)),(int)(4000+random.nextDouble()*(model.maxAltitude)),model,spawn, Flight.State.Arriving);
+    }
 
 
+    public DifficultySettings getDifficultySettings() {
+        return difficultySettings;
+    }
 
+    public void setDifficultySettings(DifficultySettings difficultySettings) {
+        this.difficultySettings = difficultySettings;
+    }
+
+    public List<Flight> getFlights() {
+        return flights;
+    }
+
+    public void  addFlight(Flight flight){
+        if (flight.isArriving()){
+            difficultySettings.currArrivingFlights++;
+        }else {
+            difficultySettings.currDepartingFlights++;
+        }
+        flights.add(flight);
+    }
 }

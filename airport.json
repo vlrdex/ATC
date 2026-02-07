@@ -48,7 +48,7 @@
       { "name": "B01", "point2D": { "x": 640, "y": 45 }, "type": "dest" },
       { "name": "B02", "point2D": { "x": 640, "y": 675 }, "type": "dest" },
       { "name": "B03", "point2D": { "x": 40, "y": 360 }, "type": "dest" },
-      { "name": "B04", "point2D": { "x": 1240, "y": 360 }, "type": "dest" },
+      { "name": "Balaton", "point2D": { "x": 1240, "y": 360 }, "type": "dest" },
 
       { "name": "B10", "point2D": { "x": 90, "y": 90 }, "type": "dest" },
       { "name": "B11", "point2D": { "x": 1190, "y": 90 }, "type": "dest" },

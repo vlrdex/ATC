@@ -323,8 +323,8 @@ public class GameView{
         gc.setStroke(Color.WHITE);
         gc.setFill(Color.WHITE);
 
-        synchronized (gameController.flights) {
-            for (var flight : gameController.flights) {
+        synchronized (gameController.getFlights()) {
+            for (var flight : gameController.getFlights()) {
                 if (flight.getState()!= Flight.State.WaitingForTakeOff){
                     Point2D position = flight.getPosition();
                     gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
@@ -348,7 +348,7 @@ public class GameView{
     public void updateAircraftList() {
 
         //puts in new flights
-        for (Flight flight : gameController.flights) {
+        for (Flight flight : gameController.getFlights()) {
             if (!flightCards.containsKey(flight)) {
                 VBox card = createFlightCard(flight);
                 flightCards.put(flight, card);
@@ -358,14 +358,14 @@ public class GameView{
 
         //removes flight
         flightCards.keySet().removeIf(f -> {
-            if (!gameController.flights.contains(f)) {
+            if (!gameController.getFlights().contains(f)) {
                 aircraftListContainer.getChildren().remove(flightCards.get(f));
                 return true;
             }
             return false;
         });
 
-        for (Flight flight : gameController.flights) {
+        for (Flight flight : gameController.getFlights()) {
             updateFlightCard(flight);
         }
     }

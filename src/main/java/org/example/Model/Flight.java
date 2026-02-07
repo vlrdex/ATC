@@ -28,6 +28,8 @@ public class Flight {
     private boolean atDirection=false;
     private State state;
 
+    private Point destination;
+
     //TODO maradék adatokkal kiegésziteni
 
 
@@ -38,7 +40,8 @@ public class Flight {
     private static final Random random = new Random(12);
 
 
-    public Flight(int currDeg, int assignedDeg, int currSpeed, int assignedSpeed, int currAltitude, int assignedAltitude, ACModel type, Point2D position,State state) {
+
+    public Flight(double currDeg, double assignedDeg, int currSpeed, int assignedSpeed, int currAltitude, int assignedAltitude, ACModel type, Point2D position,State state) {
         this.id=generateId();
         this.currDeg = currDeg;
         this.assignedDeg = assignedDeg;
@@ -52,7 +55,7 @@ public class Flight {
         this.state=state;
     }
 
-    public Flight(int currDeg, int currSpeed, int currAltitude, ACModel type, Point2D position,State state) {
+    public Flight(double currDeg, int currSpeed, int currAltitude, ACModel type, Point2D position,State state) {
         this.id=generateId();
         this.currDeg = currDeg;
         this.assignedDeg=currDeg;
@@ -82,6 +85,10 @@ public class Flight {
             }
             case Landing -> {
                 landingLogic();
+            }
+            case Departing -> {
+                checkAtDest();
+                adjustCurrentData();
             }
             default -> {
                 adjustCurrentData();
@@ -197,14 +204,19 @@ public class Flight {
     }
 
     private void landingLogic(){
-        if (this.position.distance(this.heading.getPoint2D()) <=5){
+        if (this.position.distance(this.heading.getPoint2D()) <=15){
             this.heading=GameController.getInstance().airPort.getOppositeRunWayPoint(this.heading);
             this.assignedAltitude=0;
         }
         if (this.currAltitude==0){
             this.assignedSpeed=0;
         }
-        adjustCurrentData();
+
+        if (currSpeed==0){
+            this.state=State.Landed;
+        }else{
+            adjustCurrentData();
+        }
     }
 
     private void takeOff(){
@@ -359,6 +371,22 @@ public class Flight {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    public Point getDestination() {
+        return destination;
+    }
+
+    public void setDestination(Point destination) {
+        if (!isArriving()){
+            this.destination = destination;
+        }
+    }
+
+    private void checkAtDest(){
+        if (this.position.distance(this.destination.getPoint2D()) <=15){
+            this.state=State.AtDest;
+        }
     }
 
     public boolean isArriving(){

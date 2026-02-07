@@ -8,10 +8,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import org.example.Controller.ACModelController;
 import org.example.Controller.GameController;
-import org.example.Model.AirPort;
-import org.example.Model.Flight;
-import org.example.Model.Point;
-import org.example.Model.Runway;
+import org.example.Model.*;
 import org.example.View.GameView;
 
 import java.util.List;
@@ -30,19 +27,18 @@ public class App extends Application {
         gameController.airPort=AirPort.getAirportByName("Bravo Regional");
         ACModelController acModelController=ACModelController.getInstance();
 
+        gameController.setDifficultySettings(DifficultySettings.medium());
 
 
-
-        gameController.flights.add(new Flight(40,0,0,
-                acModelController.getRandom(),null, Flight.State.WaitingForTakeOff));
-        gameController.flights.add(new Flight(359,320,15000,
+        gameController.addFlight(new Flight(359,320,15000,
                 acModelController.getRandom(),new Point2D(300,500), Flight.State.Arriving));
-        gameController.flights.add(new Flight(310,180,15000,
+        gameController.addFlight(new Flight(310,180,15000,
                 acModelController.getRandom(),new Point2D(100,200), Flight.State.Arriving));
 
         GameView gameView= new GameView(stage);
         gameView.updateAircraftList();
         gameController.setGameView(gameView);
+
 
         var gameThread = new Thread(new Runnable() {
             @Override
