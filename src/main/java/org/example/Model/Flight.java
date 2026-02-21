@@ -30,7 +30,8 @@ public class Flight {
 
     private Point destination;
 
-    //TODO maradék adatokkal kiegésziteni
+    public boolean isInDanger;
+
 
 
     //generáláshoz szükséges adatok
@@ -226,6 +227,11 @@ public class Flight {
             this.currAltitude+=(this.type.climbRate/2);
         }
         if (currSpeed>=160){
+            Runway runway = GameController.getInstance().airPort.getRunwayWithPoint(heading);
+            if (runway!=null)
+            {
+                runway.setOccupied(false);
+            }
             this.state=State.Departing;
         }
     }
@@ -316,6 +322,16 @@ public class Flight {
                     GameController.getInstance().gameView.updateHistory("Invalid point for take off!");
                 }else {
                     Point spawn=GameController.getInstance().airPort.getOppositeRunWayPoint(heading);
+                    Runway runway=GameController.getInstance().airPort.getRunwayWithPoint(heading);
+                    if (runway!=null)
+                    {
+                        if (runway.getOccupied())
+                        {
+                            GameController.getInstance().stats.wrongDis++;
+                        }
+                        runway.setOccupied(true);
+                    }
+
 
                     Point2D dirVector=new Point2D(heading.getX()-spawn.getX(), heading.getY()-spawn.getY()).normalize();
                     Point2D baseVector=VectorUtils.getNormalizedDirVector(0);
@@ -341,6 +357,15 @@ public class Flight {
                         if (VectorUtils.calculateIfPointIsInside(pair.getKey().getPoint2D(), pair.getValue().getPoint2D(), this.getPosition())){
                             this.state=State.Landing;
                             this.assignedAltitude=200;
+
+                            Runway runway = GameController.getInstance().airPort.getRunwayWithPoint(heading);
+                            if (runway.isWindWrong(GameController.getInstance().wind,heading))
+                            {
+                                GameController.getInstance().stats.wrongDis++;
+                            }else
+                            {
+                                GameController.getInstance().stats.correctDis++;
+                            }
                         }
                     }
                 }
@@ -355,6 +380,10 @@ public class Flight {
                 this.setAssignedSpeed(this.assignedSpeed);
                 this.setAssignedAltitude(this.assignedAltitude);
                 this.state=State.Arriving;
+            }
+            case TakeOff ->
+            {
+                break;
             }
             default -> {
                 this.heading = heading;
@@ -395,7 +424,7 @@ public class Flight {
 
     @Override
     public String toString(){
-        return id+" alt: "+currAltitude+"\nspd: "+currSpeed+" deg: "+currDeg;
+        return id+" alt: "+currAltitude+"\nspd: "+currSpeed+" deg: "+String.format("%.2f", currDeg);
     }
 
     public enum State{

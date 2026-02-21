@@ -29,11 +29,11 @@ public class App extends Application {
 
         gameController.setDifficultySettings(DifficultySettings.medium());
 
-
-        gameController.addFlight(new Flight(359,320,15000,
-                acModelController.getRandom(),new Point2D(300,500), Flight.State.Arriving));
-        gameController.addFlight(new Flight(310,180,15000,
-                acModelController.getRandom(),new Point2D(100,200), Flight.State.Arriving));
+//
+//        gameController.addFlight(new Flight(359,320,15000,
+//                acModelController.getRandom(),new Point2D(300,500), Flight.State.Arriving));
+//        gameController.addFlight(new Flight(310,180,15000,
+//                acModelController.getRandom(),new Point2D(100,200), Flight.State.Arriving));
 
         GameView gameView= new GameView(stage);
         gameView.updateAircraftList();

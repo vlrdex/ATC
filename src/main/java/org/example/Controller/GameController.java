@@ -14,10 +14,12 @@ public class GameController {
     public AirPort airPort;
     private boolean isRunning=false;
     public GameView gameView;
+    public final Stats stats = new Stats();
 
     private DifficultySettings difficultySettings;
 
     private final Random random=new Random();
+    public final  Wind wind=new Wind(0,0);
     private static GameController instace;
 
 
@@ -56,7 +58,7 @@ public class GameController {
 
     private void gameLoop(){
         long lastUpdateTime = System.currentTimeMillis();
-        long interval = 100;
+        long interval = 1000;
 
         while (isRunning) {
             long currentTime = System.currentTimeMillis();
@@ -64,25 +66,58 @@ public class GameController {
 
             if (currentTime - lastUpdateTime >= interval) {
 
+                wind.change();
+
                 synchronized (flights){
                     if (flights.size()<difficultySettings.getMaxFlights()){
-                        if (random.nextInt(100)==1){
+                        if (random.nextInt(100)==1  || flights.isEmpty()){
                             flights.add(generateRandomFlight());
                         }
                     }
 
                     List<Flight> flightsToRemove= new ArrayList<>();
 
+                    for (Flight flight: flights)
+                    {
+                        flight.isInDanger=false;
+                        for (Flight other: flights)
+                        {
+                            if (other!= flight)
+                            {
+                                if (flight.getPosition().distance(other.getPosition())<30)
+                                {
+                                    if (Math.abs(flight.getCurrAltitude()-other.getCurrAltitude()) <2000)
+                                    {
+                                        stats.wrongDis++;
+                                        flight.isInDanger=true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
 
                     for (Flight flight : flights) {
+
                         if (flight.getState()== Flight.State.Landed || flight.getState()== Flight.State.AtDest){
                             flightsToRemove.add(flight);
                             continue;
                         }
+
                         flight.move();
                     }
 
                     for (Flight flight : flightsToRemove) {
+                        if (flight.isArriving())
+                        {
+                            stats.lands++;
+                            difficultySettings.currArrivingFlights--;
+                        }else
+                        {
+                            stats.atDest++;
+                            difficultySettings.currDepartingFlights--;
+                        }
+                        stats.flightManaged++;
                         flights.remove(flight);
                     }
                 }
@@ -158,18 +193,22 @@ public class GameController {
     private Flight generateDeparting(){
         Flight flight = new Flight(0,0,0, ACModelController.getInstance().getRandom(), null, Flight.State.WaitingForTakeOff);
         flight.setDestination(airPort.getRandomDest());
+        difficultySettings.currDepartingFlights++;
         return flight;
     }
 
     private Flight generateArriving(){
         Point2D spawn= VectorUtils.getRandomPointForSpawning();
-        double deg=VectorUtils.angleTo(spawn,new Point2D(
-                100 + random.nextDouble() * (1280 - 200),
-                100 + random.nextDouble() * (720 - 200)
-        ));
-        ACModel model= ACModelController.getInstance().getRandom();
 
-        return new Flight(deg,(int)(160+random.nextDouble()*(model.topSpeed)),(int)(4000+random.nextDouble()*(model.maxAltitude)),model,spawn, Flight.State.Arriving);
+        Point2D lookat=new Point2D(
+                200 + random.nextDouble() * (1280 - 400),
+                100 + random.nextDouble() * (720 - 200)
+        );
+        double deg=VectorUtils.angleTo(spawn,lookat);
+        ACModel model= ACModelController.getInstance().getRandom();
+        difficultySettings.currArrivingFlights++;
+
+        return new Flight(deg+90,(int)(160+random.nextDouble()*(model.topSpeed)),(int)(4000+random.nextDouble()*(model.maxAltitude)),model,spawn, Flight.State.Arriving);
     }
 
 

@@ -141,4 +141,21 @@ public class AirPort {
         }
 
     }
+
+    public Runway getRunwayWithPoint(Point point)
+    {
+        if (point.getType()!= Point.Type.runway)
+        {
+            return null;
+        }
+
+        for (Runway runway : runways)
+        {
+            if (runway.getEndPoints().contains(point))
+            {
+                return runway;
+            }
+        }
+        return null;
+    }
 }

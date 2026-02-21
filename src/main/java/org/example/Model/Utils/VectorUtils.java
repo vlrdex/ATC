@@ -91,7 +91,7 @@ public class VectorUtils {
         double angleRad = Math.atan2(dy, dx);
         double angleDeg = Math.toDegrees(angleRad);
 
-        if (angleDeg < 0) angleDeg += 360; // normalize to 0–359
+        if (angleDeg < 0) angleDeg += 360;
         return angleDeg;
     }
 

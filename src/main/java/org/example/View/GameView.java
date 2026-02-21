@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import org.example.Controller.GameController;
 import org.example.Model.AirPort;
@@ -267,8 +268,8 @@ public class GameView{
             switch (event.getCode()){
                 case ESCAPE:
                     gameController.changeFlightAsPlayerInput("stop");
-                    stage.close();
                     modelStage.close();
+                    new StatsView(stage,gameController.stats);
                     break;
             }
         });
@@ -318,16 +319,28 @@ public class GameView{
             gc.fillText(point.getName(), point.getX()-15, point.getY()-10 );
         }
 
+        gc.fillText(gameController.wind.toString(),1100,30);
 
-        //Draws the planes
-        gc.setStroke(Color.WHITE);
-        gc.setFill(Color.WHITE);
+
 
         synchronized (gameController.getFlights()) {
             for (var flight : gameController.getFlights()) {
                 if (flight.getState()!= Flight.State.WaitingForTakeOff){
+                    gc.setStroke(Color.WHITE);
+                    gc.setFill(Color.WHITE);
+
+                    if (flight.isInDanger)
+                    {
+                        gc.setStroke(Color.RED);
+                        gc.setFill(Color.RED);
+                    }
+
                     Point2D position = flight.getPosition();
                     gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
+                    if (flight==selected)
+                    {
+                        gc.setFill(Color.BLUE);
+                    }
                     gc.fillText(flight.toString(), position.getX() - 30, position.getY() + 30, 100);
 
                     Point2D direction= VectorUtils.getNormalizedDirVector(flight.getCurrDeg()).multiply(600).add(position);

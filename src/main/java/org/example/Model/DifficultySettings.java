@@ -58,10 +58,23 @@ public class DifficultySettings {
 
     public static DifficultySettings medium(){
         DifficultySettings df=new DifficultySettings();
-        df.setMaxFlights(8);
-        df.setMaxArrivingFlights(4);
-        df.setMaxDepartingFlights(4);
+        df.maxFlights=8;
+        df.maxArrivingFlights=4;
+        df.maxDepartingFlights=4;
+        df.currDepartingFlights=0;
+        df.currArrivingFlights=0;
 
         return df;
+    }
+
+    @Override
+    public String toString() {
+        return "DifficultySettings{" +
+                "maxFlights=" + maxFlights +
+                ", maxArrivingFlights=" + maxArrivingFlights +
+                ", maxDepartingFlights=" + maxDepartingFlights +
+                ", currArrivingFlights=" + currArrivingFlights +
+                ", currDepartingFlights=" + currDepartingFlights +
+                '}';
     }
 }
