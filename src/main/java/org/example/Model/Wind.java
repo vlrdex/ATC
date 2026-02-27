@@ -45,6 +45,7 @@ public class Wind {
     public void changeSpeed() {
         double change = random.nextGaussian() * 2.0;
         speed = Math.max(0, speed + change);
+        speed = Math.min(60,speed);
     }
 
     public void change()

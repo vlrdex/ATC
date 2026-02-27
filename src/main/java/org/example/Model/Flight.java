@@ -303,6 +303,11 @@ public class Flight {
     }
 
     public Point2D getPosition() {
+        if  (position==null)
+        {
+            return  new Point2D(-5000,-5000);
+        }
+
         return position;
     }
 

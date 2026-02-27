@@ -335,15 +335,16 @@ public class GameView{
                         gc.setFill(Color.RED);
                     }
 
-                    Point2D position = flight.getPosition();
-                    gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
                     if (flight==selected)
                     {
-                        gc.setFill(Color.BLUE);
+                        gc.setFill(Color.LIGHTBLUE);
+                        gc.setStroke(Color.LIGHTBLUE);
                     }
+                    Point2D position = flight.getPosition();
+                    gc.strokeOval(position.getX()-5, position.getY()-5, 10, 10);
                     gc.fillText(flight.toString(), position.getX() - 30, position.getY() + 30, 100);
 
-                    Point2D direction= VectorUtils.getNormalizedDirVector(flight.getCurrDeg()).multiply(600).add(position);
+                    Point2D direction= VectorUtils.getNormalizedDirVector(flight.getCurrDeg()).multiply(15).add(position);
                     gc.strokeLine(position.getX(),position.getY(),direction.getX(),direction.getY());
                 }
             }

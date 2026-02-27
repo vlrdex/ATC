@@ -193,6 +193,8 @@ public class GameController {
     private Flight generateDeparting(){
         Flight flight = new Flight(0,0,0, ACModelController.getInstance().getRandom(), null, Flight.State.WaitingForTakeOff);
         flight.setDestination(airPort.getRandomDest());
+        flight.setAssignedAltitude(5000);
+        flight.setAssignedSpeed(250);
         difficultySettings.currDepartingFlights++;
         return flight;
     }

@@ -12,7 +12,7 @@ public class Runway {
     //point from the first point to the direction of the second point
     private Point2D dirVector;
 
-    private Boolean isOccupied;
+    private boolean isOccupied = false;
 
     public Runway(List<Point> endPoints){
         this.endPoints = endPoints;
@@ -30,7 +30,7 @@ public class Runway {
         this.dirVector = dirVector;
     }
 
-    public Boolean getOccupied() {
+    public boolean getOccupied() {
         return isOccupied;
     }
 
