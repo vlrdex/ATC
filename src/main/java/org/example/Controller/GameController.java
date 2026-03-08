@@ -14,7 +14,7 @@ public class GameController {
     public AirPort airPort;
     private boolean isRunning=false;
     public GameView gameView;
-    public final Stats stats = new Stats();
+    public Stats stats = new Stats();
 
     private DifficultySettings difficultySettings;
 
@@ -210,7 +210,11 @@ public class GameController {
         ACModel model= ACModelController.getInstance().getRandom();
         difficultySettings.currArrivingFlights++;
 
-        return new Flight(deg+90,(int)(160+random.nextDouble()*(model.topSpeed)),(int)(4000+random.nextDouble()*(model.maxAltitude)),model,spawn, Flight.State.Arriving);
+        return new Flight(deg+90
+                ,(int)(Math.min(160,random.nextDouble()*(model.topSpeed)))
+                ,(int)Math.min(4000,random.nextDouble()*(model.maxAltitude))
+                ,model,spawn
+                , Flight.State.Arriving);
     }
 
 

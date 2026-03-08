@@ -487,7 +487,13 @@ public class GameView{
         Label modelLabel = new Label("Model: " + flight.getType().name);
         degLabel.setStyle("-fx-text-fill: white;");
 
-        card.getChildren().addAll(nameLabel, speedLabel, altLabel, degLabel,headingLabel,modelLabel);
+        Label dest = null;
+        if (!flight.isArriving()){
+            dest = new Label("Dest: " + flight.getDestination().getName());
+            dest.setStyle("-fx-text-fill: white;");
+        }
+
+        card.getChildren().addAll(nameLabel, speedLabel, altLabel, degLabel,headingLabel,modelLabel, dest != null ? dest : new Label());
         return card;
     }
 

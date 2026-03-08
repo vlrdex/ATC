@@ -144,7 +144,8 @@ public class AirPort {
 
     public Runway getRunwayWithPoint(Point point)
     {
-        if (point.getType()!= Point.Type.runway)
+
+        if (point==null || point.getType()!= Point.Type.runway)
         {
             return null;
         }

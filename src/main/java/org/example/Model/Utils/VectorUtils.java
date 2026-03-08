@@ -94,10 +94,4 @@ public class VectorUtils {
         if (angleDeg < 0) angleDeg += 360;
         return angleDeg;
     }
-
-
-
-
-
-
 }
